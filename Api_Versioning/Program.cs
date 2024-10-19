@@ -1,4 +1,6 @@
 
+using Microsoft.AspNetCore.Mvc.Versioning;
+
 namespace Api_Versioning
 {
     public class Program
@@ -14,8 +16,20 @@ namespace Api_Versioning
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-           
-
+            builder.Services.AddApiVersioning(option =>
+            {
+                option.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+                option.AssumeDefaultVersionWhenUnspecified = true;
+                option.ReportApiVersions = true;
+                option.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
+                   new HeaderApiVersionReader("x-api-version"),
+                    new MediaTypeApiVersionReader("x-api-version"));
+            });
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Other Swagger configurations...
+                options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());  // Pick the first conflicting action
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
